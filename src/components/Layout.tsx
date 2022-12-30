@@ -29,7 +29,7 @@ const Layout: FC<{ children: ReactNode }> = ({ children }) => {
             header={<Header setOpened={setOpened} opened={opened} />}
         >
             <Head>
-                <title>Newsbrige</title>
+                <title>NewsRoom</title>
             </Head>
             {children}
         </AppShell>

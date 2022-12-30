@@ -2,12 +2,12 @@ import type { DefaultMantineColor } from '@mantine/core';
 import { Navbar as MantineNav } from '@mantine/core';
 import type { FC, ReactElement } from 'react';
 import React from 'react';
-import { IconArticle, IconLogin, IconLogout } from '@tabler/icons';
+import { IconArticle, IconLogin, IconLogout, IconPencil } from '@tabler/icons';
 import NavLink from './NavLink';
 import { useSession } from 'next-auth/react';
 
 const Navbar: FC<{ opened: boolean }> = ({ opened }) => {
-    const { data, status } = useSession();
+    const { status } = useSession();
     return (
         <MantineNav
             p="md"
@@ -36,6 +36,12 @@ const loggedData: NavData[] = [
         color: 'grape',
         label: 'Add Article',
         href: '/article/add',
+    },
+    {
+        icon: <IconPencil size={16} />,
+        color: 'green',
+        label: 'Vote',
+        href: '/article/vote',
     },
     {
         icon: <IconLogout size={16} />,

@@ -1,8 +1,16 @@
+import ArticleTable from '../../components/ArticleTable';
 import { trpc } from '../../utils/trpc';
 
 const VotePage = () => {
-    const { data } = trpc.article.getArticles.useQuery({ published: false });
-    return <div>{JSON.stringify(data)}</div>;
+    const { data: categories } = trpc.article.getCategories.useQuery();
+
+    return (
+        <div>
+            {categories?.map((category) => (
+                <ArticleTable key={category.id} category={category} />
+            ))}
+        </div>
+    );
 };
 
 export default VotePage;

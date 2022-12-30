@@ -1,12 +1,8 @@
 import { type NextPage } from 'next';
-import React, { Fragment } from 'react';
+import React from 'react';
 
 const Home: NextPage = () => {
-    return (
-        <>
-            <p>hello</p>
-        </>
-    );
+    return <div></div>;
 };
 
 export default Home;

@@ -33,7 +33,7 @@ const Header: FC<HeaderProps> = ({ opened, setOpened }) => {
                     />
                 </MediaQuery>
                 <Text size="xl" fw={700} ml="md">
-                    Newsbridge
+                    NewsRoom
                 </Text>
             </div>
         </MantineHeader>
