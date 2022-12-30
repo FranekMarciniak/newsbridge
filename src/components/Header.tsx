@@ -6,7 +6,7 @@ import {
     Text,
     useMantineTheme,
 } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
+import { useSession } from 'next-auth/react';
 
 interface HeaderProps {
     opened: boolean;
@@ -14,6 +14,7 @@ interface HeaderProps {
 }
 const Header: FC<HeaderProps> = ({ opened, setOpened }) => {
     const theme = useMantineTheme();
+    const { data } = useSession();
     return (
         <MantineHeader height={{ base: 50, md: 70 }} p="md">
             <div
@@ -34,6 +35,9 @@ const Header: FC<HeaderProps> = ({ opened, setOpened }) => {
                 </MediaQuery>
                 <Text size="xl" fw={700} ml="md">
                     NewsRoom
+                </Text>
+                <Text size="md" fw={500} ml="md">
+                    {data?.user?.email}
                 </Text>
             </div>
         </MantineHeader>
