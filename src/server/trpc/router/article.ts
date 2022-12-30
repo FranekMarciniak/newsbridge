@@ -9,6 +9,7 @@ import type {
     User,
     Vote,
 } from '@prisma/client';
+import { trigger } from '../../../utils/pusher';
 
 export interface ArticleWithRelations extends Article {
     category: Category;
@@ -75,5 +76,47 @@ export const articleRouter = router({
                     URL,
                 },
             });
+        }),
+    toggleVote: protectedProcedure
+        .input(z.object({ articleId: z.string().cuid() }))
+        .mutation(async ({ ctx, input }) => {
+            const { articleId } = input;
+            const {
+                user: { id: userId },
+            } = ctx.session;
+
+            let res;
+
+            const vote = await ctx.prisma.vote.findFirst({
+                where: {
+                    articleId,
+                    userId,
+                },
+            });
+
+            if (vote) {
+                res = await ctx.prisma.vote.delete({
+                    where: {
+                        id: vote.id,
+                    },
+                });
+            } else {
+                await ctx.prisma.vote.create({
+                    data: {
+                        articleId,
+                        userId,
+                    },
+                });
+            }
+
+            await trigger({
+                channel: 'votes-channel',
+                event: 'vote-event',
+                data: {
+                    vote: res,
+                },
+            });
+
+            return res;
         }),
 });

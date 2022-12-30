@@ -1,19 +1,42 @@
 import type { Category } from '@prisma/client';
 import type { FC } from 'react';
-import { ActionIcon, Button, Container, Table, Title } from '@mantine/core';
+import { Container, Table, Title } from '@mantine/core';
 import { trpc } from '../utils/trpc';
-import { IconDots } from '@tabler/icons';
-// import { IconDots } from '@tabler/icons';
+import { useSubscribeToEvent } from '../hooks/useSubscribeToEvent';
+import { useSession } from 'next-auth/react';
+import VoteButton from './VoteButton';
+import type { ArticleWithRelations } from '../server/trpc/router/article';
 
 interface ArticleTableProps {
     category: Category;
 }
 
 const ArticleTable: FC<ArticleTableProps> = ({ category }) => {
-    const { data: articles } = trpc.article.getArticles.useQuery({
+    const { data: articles, refetch } = trpc.article.getArticles.useQuery({
         published: false,
         categoryId: category.id,
     });
+
+    const { data: userData } = useSession();
+    const { mutate: voteMutation } = trpc.article.toggleVote.useMutation();
+
+    useSubscribeToEvent({
+        callback: () => {
+            refetch();
+        },
+        channelName: 'votes-channel',
+        eventName: 'vote-event',
+    });
+
+    const handleVote = (articleId: string) => {
+        voteMutation({ articleId });
+    };
+
+    const isUpvoted = (article: ArticleWithRelations) => {
+        return Boolean(
+            article.Vote.find((vote) => vote.userId === userData?.user?.id)
+        );
+    };
 
     return (
         <Container p="md">
@@ -26,8 +49,7 @@ const ArticleTable: FC<ArticleTableProps> = ({ category }) => {
                         <th>Title</th>
                         <th>URL</th>
                         <th>Description</th>
-                        <th>Published</th>
-                        <th>Actions</th>
+                        <th>Vote</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,11 +58,11 @@ const ArticleTable: FC<ArticleTableProps> = ({ category }) => {
                             <td>{article.title}</td>
                             <td>{article.URL}</td>
                             <td>{article.description}</td>
-                            <td>{Boolean(article.newsletterId).toString()}</td>
                             <td>
-                                <ActionIcon color="blue" variant="light">
-                                    <IconDots size={18} />
-                                </ActionIcon>
+                                <VoteButton
+                                    onClick={() => handleVote(article.id)}
+                                    upvoted={isUpvoted(article)}
+                                />
                             </td>
                         </tr>
                     ))}

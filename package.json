@@ -38,6 +38,8 @@
     "node-fetch": "^3.3.0",
     "nodemailer": "^6.8.0",
     "notistack": "^2.0.8",
+    "pusher": "^5.1.2",
+    "pusher-js": "^8.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "stylis-plugin-rtl": "^2.1.1",
