@@ -12,13 +12,12 @@ export const useSubscribeToEvent = ({
     callback: (data: any) => void;
 }) => {
     const pusher = usePusher();
-
     useEffect(() => {
         if (pusher) {
             const channel = pusher.subscribe(channelName);
             channel.bind(eventName, callback);
         }
-    }, [callback, channelName, eventName, pusher]);
+    }, [pusher]);
 
     return { pusher };
 };

@@ -59,7 +59,7 @@ export const articleRouter = router({
         }),
     postArticle: protectedProcedure
         .input(articleSchema)
-        .mutation(({ ctx, input }) => {
+        .mutation(async ({ ctx, input }) => {
             const {
                 title,
                 description,
@@ -67,6 +67,16 @@ export const articleRouter = router({
                 user: userId,
                 link: URL,
             } = input;
+
+            await trigger({
+                channel: 'article-channel',
+                event: 'article-event',
+                data: {
+                    categoryId,
+                    userId,
+                },
+            });
+
             return ctx.prisma.article.create({
                 data: {
                     categoryId,
@@ -78,15 +88,17 @@ export const articleRouter = router({
             });
         }),
     toggleVote: protectedProcedure
-        .input(z.object({ articleId: z.string().cuid() }))
+        .input(
+            z.object({
+                articleId: z.string().cuid(),
+                categoryId: z.string().cuid(),
+            })
+        )
         .mutation(async ({ ctx, input }) => {
             const { articleId } = input;
             const {
                 user: { id: userId },
             } = ctx.session;
-
-            let res;
-
             const vote = await ctx.prisma.vote.findFirst({
                 where: {
                     articleId,
@@ -94,29 +106,28 @@ export const articleRouter = router({
                 },
             });
 
-            if (vote) {
-                res = await ctx.prisma.vote.delete({
-                    where: {
-                        id: vote.id,
-                    },
-                });
-            } else {
-                await ctx.prisma.vote.create({
-                    data: {
-                        articleId,
-                        userId,
-                    },
-                });
-            }
+            vote
+                ? await ctx.prisma.vote.delete({
+                      where: {
+                          id: vote.id,
+                      },
+                  })
+                : await ctx.prisma.vote.create({
+                      data: {
+                          articleId,
+                          userId,
+                      },
+                  });
 
             await trigger({
-                channel: 'votes-channel',
-                event: 'vote-event',
+                channel: 'article-channel',
+                event: 'article-event',
                 data: {
-                    vote: res,
+                    categoryId: input.categoryId,
+                    userId,
                 },
             });
 
-            return res;
+            return { categoryId: input.categoryId };
         }),
 });
