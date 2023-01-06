@@ -1,5 +1,5 @@
 import { ActionIcon } from '@mantine/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons';
 
@@ -13,6 +13,10 @@ const VoteButton: FC<{ upvoted: boolean; onClick: () => void }> = ({
         onClick();
         setValue((prev) => !prev);
     };
+
+    useEffect(() => {
+        setValue(upvoted);
+    }, [upvoted]);
 
     return (
         <ActionIcon

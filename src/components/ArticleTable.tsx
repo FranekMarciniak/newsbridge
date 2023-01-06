@@ -12,24 +12,34 @@ interface ArticleTableProps {
 }
 
 const ArticleTable: FC<ArticleTableProps> = ({ category }) => {
-    const { data: articles, refetch } = trpc.article.getArticles.useQuery({
-        published: false,
-        categoryId: category.id,
-    });
+    const { data: articles, refetch: refetchArticles } =
+        trpc.article.getArticles.useQuery({
+            published: false,
+            categoryId: category.id,
+        });
 
     const { data: userData } = useSession();
-    const { mutate: voteMutation } = trpc.article.toggleVote.useMutation();
+    const { mutate: voteMutation } = trpc.article.toggleVote.useMutation({
+        onSuccess: ({ categoryId }) => {
+            if (categoryId === category.id) refetchArticles();
+        },
+    });
 
     useSubscribeToEvent({
-        callback: () => {
-            refetch();
+        callback: (data) => {
+            if (
+                data.userId !== userData?.user?.id &&
+                data.categoryId === category.id
+            ) {
+                refetchArticles();
+            }
         },
-        channelName: 'votes-channel',
-        eventName: 'vote-event',
+        channelName: 'article-channel',
+        eventName: 'article-event',
     });
 
     const handleVote = (articleId: string) => {
-        voteMutation({ articleId });
+        voteMutation({ articleId, categoryId: category.id });
     };
 
     const isUpvoted = (article: ArticleWithRelations) => {
